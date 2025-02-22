@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Spine Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Remove spinner arrows from number input */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        
+        .result-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .hover-btn:hover {
+            transform: translateY(-1px);
+            transition: transform 0.2s;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">Book Spine Calculator</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="spineCalculator" class="needs-validation" novalidate>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-12">
+                                    <label for="pageExtent" class="form-label">Total Number of Pages</label>
+                                    <input type="number" class="form-control" id="pageExtent" required min="1">
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="paperType" class="form-label">Text Paper Stock</label>
+                                    <select class="form-select" id="paperType" required>
+                                        <option value="">Select Paper Type</option>
+                                        <option value="amber_80">Amber Preprint 80 gsm</option>
+                                        <option value="woodfree_80">Woodfree 80 gsm</option>
+                                        <option value="munken_70">Munken Print Cream 70 gsm</option>
+                                        <option value="letsgo_90">LetsGo Silk 90 gsm</option>
+                                        <option value="matt_115">Matt 115 gsm</option>
+                                        <option value="holmen_60">Holmen Book Cream 60 gsm</option>
+                                        <option value="mechanical_70">Enso 70 gsm</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="bindingStyle" class="form-label">Binding Style</label>
+                                    <select class="form-select" id="bindingStyle" required onchange="toggleBoardThickness()">
+                                        <option value="">Select Binding Style</option>
+                                        <option value="Limp">Limp</option>
+                                        <option value="Cased">Cased</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Board Thickness section - hidden by default -->
+                            <div class="row g-3 mb-3 d-none" id="boardThicknessSection">
+                                <div class="col-md-12">
+                                    <label for="boardThickness" class="form-label">Board Thickness (mm)</label>
+                                    <select class="form-select" id="boardThickness">
+                                        <option value="1.5">1.5 mm</option>
+                                        <option value="1.9">1.9 mm</option>
+                                        <option value="2.5">2.5 mm</option>
+                                        <option value="2.75">2.75 mm</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mb-3">
+                                <button type="button" class="btn btn-primary hover-btn px-4" onclick="calculateSpine()">
+                                    Calculate Spine Width
+                                </button>
+                                <button type="button" class="btn btn-secondary hover-btn px-4" onclick="clearCalculator()">
+                                    Clear Fields
+                                </button>
+                            </div>
+                            
+                            <div class="result-box d-none" id="resultBox">
+                                <h5>Calculation Results:</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-2">Paper Weight: <span id="paperWeight">-</span></p>
+                                        <p class="mb-2">Paper Volume: <span id="paperVolume">-</span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-2">Base Thickness: <span id="baseThickness">-</span> mm</p>
+                                        <p class="mb-0"><strong>Final Spine Width: <span id="spineResult">-</span> mm</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Paper specifications
+        const PAPER_SPECS = {
+            amber_80: {
+                name: 'Amber Preprint 80 gsm',
+                grammage: 80,
+                volume: 13
+            },
+            woodfree_80: {
+                name: 'Woodfree 80 gsm',
+                grammage: 80,
+                volume: 17.5
+            },
+            munken_70: {
+                name: 'Munken Print Cream 70 gsm',
+                grammage: 70,
+                volume: 18
+            },
+            letsgo_90: {
+                name: 'LetsGo Silk 90 gsm',
+                grammage: 90,
+                volume: 10
+            },
+            matt_115: {
+                name: 'Matt 115 gsm',
+                grammage: 115,
+                volume: 11
+            },
+            holmen_60: {
+                name: 'Holmen Book Cream 60 gsm',
+                grammage: 60,
+                volume: 18
+            },
+            mechanical_70: {
+                name: 'Enso 70 gsm',
+                grammage: 70,
+                volume: 20
+            }
+        };
+
+        // Constants
+        const SPINE_CALCULATION_FACTOR = 20000;
+        const CASED_ADDITION = 0.50; // Additional thickness for cased binding
+
+        // Toggle board thickness section visibility
+        function toggleBoardThickness() {
+            const bindingStyle = document.getElementById('bindingStyle').value;
+            const boardSection = document.getElementById('boardThicknessSection');
+            
+            if (bindingStyle === 'Cased') {
+                boardSection.classList.remove('d-none');
+            } else {
+                boardSection.classList.add('d-none');
+            }
+        }
+
+        // Calculate spine width
+        function calculateSpineWidth(pageExtent, paperSpecs, bindingStyle, boardThickness) {
+            const baseSpineThickness = (pageExtent * paperSpecs.grammage * paperSpecs.volume) / SPINE_CALCULATION_FACTOR;
+
+            if (bindingStyle === 'Cased') {
+                return baseSpineThickness + parseFloat(boardThickness) + CASED_ADDITION;
+            }
+            return baseSpineThickness;
+        }
+
+        // Main calculation function
+        function calculateSpine() {
+            // Get input values
+            const pageExtent = parseInt(document.getElementById('pageExtent').value);
+            const paperType = document.getElementById('paperType').value;
+            const bindingStyle = document.getElementById('bindingStyle').value;
+            const boardThickness = document.getElementById('boardThickness').value;
+
+            // Validate inputs
+            if (!pageExtent || !paperType || !bindingStyle) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (bindingStyle === 'Cased' && !boardThickness) {
+                alert('Please select a board thickness for cased binding');
+                return;
+            }
+
+            // Get paper specifications
+            const paperSpecs = PAPER_SPECS[paperType];
+
+            // Calculate base thickness and final spine width
+            const baseThickness = (pageExtent * paperSpecs.grammage * paperSpecs.volume) / SPINE_CALCULATION_FACTOR;
+            const spineWidth = calculateSpineWidth(pageExtent, paperSpecs, bindingStyle, boardThickness);
+
+            // Show results with rounded values
+            document.getElementById('resultBox').classList.remove('d-none');
+            document.getElementById('paperWeight').textContent = `${paperSpecs.grammage} gsm`;
+            document.getElementById('paperVolume').textContent = paperSpecs.volume;
+            document.getElementById('baseThickness').textContent = baseThickness.toFixed(2);
+            document.getElementById('spineResult').textContent = spineWidth.toFixed(2);
+
+            // Handle warning message
+            const existingAlert = document.getElementById('resultBox').querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Check if spine width exceeds 60mm
+            if (spineWidth > 60) {
+                document.getElementById('spineResult').classList.add('text-danger');
+                // Add warning after the results section
+                document.getElementById('resultBox').insertAdjacentHTML('beforeend', 
+                    '<div class="alert alert-danger mt-3 mb-0" role="alert">' +
+                    '<i class="bi bi-exclamation-triangle-fill me-2"></i>' +
+                    'Warning: Spine width exceeds 60mm maximum specification for bindery equipment' +
+                    '</div>'
+                );
+            } else {
+                document.getElementById('spineResult').classList.remove('text-danger');
+            }
+        }
+
+        // Clear calculator function
+        function clearCalculator() {
+            // Reset input fields
+            document.getElementById('pageExtent').value = '';
+            document.getElementById('paperType').value = '';
+            document.getElementById('bindingStyle').value = '';
+            
+            // Hide board thickness section
+            document.getElementById('boardThicknessSection').classList.add('d-none');
+            
+            // Reset board thickness to first option
+            document.getElementById('boardThickness').selectedIndex = 0;
+            
+            // Hide results
+            document.getElementById('resultBox').classList.add('d-none');
+            
+            // Remove any warning messages
+            const existingAlert = document.getElementById('resultBox').querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+        }
+
+        // Form validation
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 0) this.value = 0;
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
