@@ -71,6 +71,7 @@
                                         <option value="">Select Binding Style</option>
                                         <option value="Limp">Limp</option>
                                         <option value="Cased">Cased</option>
+                                        <option value="Cased Sewn">Cased Sewn</option>
                                     </select>
                                 </div>
                             </div>
@@ -84,6 +85,7 @@
                                         <option value="1.9">1.9 mm</option>
                                         <option value="2.5">2.5 mm</option>
                                         <option value="2.75">2.75 mm</option>
+                                        <option value="3.00">3.0 mm</option>
                                     </select>
                                 </div>
                             </div>
@@ -160,13 +162,14 @@
         // Constants
         const SPINE_CALCULATION_FACTOR = 20000;
         const CASED_ADDITION = 0.50; // Additional thickness for cased binding
+        const SEWN_ADDITION = 1.00; // Additional thickness for sewn binding
 
         // Toggle board thickness section visibility
         function toggleBoardThickness() {
             const bindingStyle = document.getElementById('bindingStyle').value;
             const boardSection = document.getElementById('boardThicknessSection');
             
-            if (bindingStyle === 'Cased') {
+            if (bindingStyle === 'Cased' || bindingStyle === 'Cased Sewn') {
                 boardSection.classList.remove('d-none');
             } else {
                 boardSection.classList.add('d-none');
@@ -179,6 +182,8 @@
 
             if (bindingStyle === 'Cased') {
                 return baseSpineThickness + parseFloat(boardThickness) + CASED_ADDITION;
+            } else if (bindingStyle === 'Cased Sewn') {
+                return baseSpineThickness + parseFloat(boardThickness) + CASED_ADDITION + SEWN_ADDITION;
             }
             return baseSpineThickness;
         }
@@ -197,7 +202,7 @@
                 return;
             }
 
-            if (bindingStyle === 'Cased' && !boardThickness) {
+            if ((bindingStyle === 'Cased' || bindingStyle === 'Cased Sewn') && !boardThickness) {
                 alert('Please select a board thickness for cased binding');
                 return;
             }
