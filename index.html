@@ -94,6 +94,9 @@
                                 <button type="button" class="btn btn-secondary hover-btn px-4" onclick="clearCalculator()">
                                     Clear Fields
                                 </button>
+                                <button type="button" class="btn btn-info hover-btn px-4" id="copyResultBtn" onclick="copyResultToClipboard()" disabled>
+                                    Copy to Clipboard
+                                </button>
                             </div>
                             
                             <div class="result-box d-none" id="resultBox">
@@ -187,6 +190,62 @@
             return baseSpineThickness;
         }
 
+        // Copy result to clipboard
+        function copyResultToClipboard() {
+            // Get input values
+            const pageExtent = document.getElementById('pageExtent').value;
+            const paperType = document.getElementById('paperType');
+            const paperTypeName = paperType.options[paperType.selectedIndex].text;
+            const bindingStyle = document.getElementById('bindingStyle').value;
+            
+            // Get board thickness if applicable
+            let boardThicknessText = '';
+            if (bindingStyle === 'Cased' || bindingStyle === 'Cased Sewn') {
+                const boardThickness = document.getElementById('boardThickness');
+                boardThicknessText = `Board Thickness: ${boardThickness.options[boardThickness.selectedIndex].text}\n`;
+            }
+            
+            // Get result values
+            const paperWeight = document.getElementById('paperWeight').textContent;
+            const paperVolume = document.getElementById('paperVolume').textContent;
+            const spineResult = document.getElementById('spineResult').textContent;
+            
+            // Create text for clipboard
+            const clipboardText = 
+`Book Spine Calculation
+-----------------------
+Total Pages: ${pageExtent}
+Paper Type: ${paperTypeName}
+Binding Style: ${bindingStyle}
+${boardThicknessText}
+Results:
+Paper Weight: ${paperWeight}
+Paper Volume: ${paperVolume}
+Final Spine Width: ${spineResult} mm`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(clipboardText)
+                .then(() => {
+                    // Add a temporary success indicator
+                    const btn = document.getElementById('copyResultBtn');
+                    const originalText = btn.textContent;
+                    
+                    btn.textContent = 'Copied!';
+                    btn.classList.remove('btn-info');
+                    btn.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.remove('btn-success');
+                        btn.classList.add('btn-info');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy to clipboard. Please try again.');
+                });
+        }
+
         // Main calculation function
         function calculateSpine() {
             // Get input values
@@ -219,6 +278,9 @@
             document.getElementById('paperVolume').textContent = paperSpecs.volume;
             document.getElementById('baseThickness').textContent = baseThickness.toFixed(2);
             document.getElementById('spineResult').textContent = spineWidth.toFixed(2);
+            
+            // Enable the copy to clipboard button
+            document.getElementById('copyResultBtn').disabled = false;
 
             // Handle warning message
             const existingAlert = document.getElementById('resultBox').querySelector('.alert');
@@ -256,6 +318,9 @@
             
             // Hide results
             document.getElementById('resultBox').classList.add('d-none');
+            
+            // Disable copy to clipboard button
+            document.getElementById('copyResultBtn').disabled = true;
             
             // Remove any warning messages
             const existingAlert = document.getElementById('resultBox').querySelector('.alert');
