@@ -231,14 +231,18 @@ Final Spine Width: ${spineResult} mm`;
                 .then(() => {
                     // Add a temporary success indicator
                     const btn = document.getElementById('copyResultBtn');
-                    const originalText = btn.textContent;
                     
-                    btn.textContent = 'Copied!';
+                    // Save original button content
+                    const originalButton = btn.innerHTML;
+                    
+                    // Replace with temporary success message while preserving responsiveness
+                    btn.innerHTML = '<span class="d-none d-md-inline">Copied!</span><span class="d-inline d-md-none">Copied!</span>';
                     btn.classList.remove('btn-info');
                     btn.classList.add('btn-success');
                     
                     setTimeout(() => {
-                        btn.textContent = originalText;
+                        // Restore original button content with spans
+                        btn.innerHTML = originalButton;
                         btn.classList.remove('btn-success');
                         btn.classList.add('btn-info');
                     }, 2000);
