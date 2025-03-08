@@ -40,18 +40,15 @@
             <div class="col-md-8">
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Book Spine Calculator</h3>
+                        <h3 class="mb-0">Book Spine Width Calculator</h3>
                     </div>
                     <div class="card-body">
                         <form id="spineCalculator" class="needs-validation" novalidate>
                             <div class="row g-3 mb-3">
-                                <div class="col-md-12">
+                                <div class="col-md-6">
                                     <label for="pageExtent" class="form-label">Total Number of Pages</label>
                                     <input type="number" class="form-control" id="pageExtent" required min="1">
                                 </div>
-                            </div>
-
-                            <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="paperType" class="form-label">Text Paper Stock</label>
                                     <select class="form-select" id="paperType" required>
@@ -65,6 +62,9 @@
                                         <option value="mechanical_70">Enso 70 gsm</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label for="bindingStyle" class="form-label">Binding Style</label>
                                     <select class="form-select" id="bindingStyle" required onchange="toggleBoardThickness()">
@@ -74,18 +74,15 @@
                                         <option value="Cased Sewn">Cased Sewn</option>
                                     </select>
                                 </div>
-                            </div>
-
-                            <!-- Board Thickness section - hidden by default -->
-                            <div class="row g-3 mb-3 d-none" id="boardThicknessSection">
-                                <div class="col-md-12">
+                                <div class="col-md-6 d-none" id="boardThicknessSection">
                                     <label for="boardThickness" class="form-label">Board Thickness (mm)</label>
                                     <select class="form-select" id="boardThickness">
                                         <option value="1.5">1.5 mm</option>
                                         <option value="1.9">1.9 mm</option>
+                                        <option value="2.0">2.0 mm</option>
+                                        <option value="2.25">2.25 mm</option>
                                         <option value="2.5">2.5 mm</option>
                                         <option value="2.75">2.75 mm</option>
-                                        <option value="3.00">3.0 mm</option>
                                     </select>
                                 </div>
                             </div>
@@ -173,6 +170,8 @@
                 boardSection.classList.remove('d-none');
             } else {
                 boardSection.classList.add('d-none');
+                // Reset board thickness to first option when hidden
+                document.getElementById('boardThickness').selectedIndex = 0;
             }
         }
 
