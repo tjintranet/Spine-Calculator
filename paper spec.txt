@@ -1,0 +1,39 @@
+<script>
+        // Paper specifications
+        const PAPER_SPECS = {
+            amber_80: {
+                name: 'Amber Preprint 80 gsm',
+                grammage: 80,
+                volume: 13
+            },
+            woodfree_80: {
+                name: 'Woodfree 80 gsm',
+                grammage: 80,
+                volume: 17.5
+            },
+            munken_70: {
+                name: 'Munken Print Cream 70 gsm',
+                grammage: 70,
+                volume: 18
+            },
+            letsgo_90: {
+                name: 'LetsGo Silk 90 gsm',
+                grammage: 90,
+                volume: 10
+            },
+            matt_115: {
+                name: 'Matt 115 gsm',
+                grammage: 115,
+                volume: 11
+            },
+            holmen_60: {
+                name: 'Holmen Book Cream 60 gsm',
+                grammage: 60,
+                volume: 18
+            },
+            mechanical_70: {
+                name: 'Enso 70 gsm',
+                grammage: 70,
+                volume: 20
+            }
+        };
