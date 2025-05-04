@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Spine Calculator</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -39,8 +40,11 @@
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="mb-0">Book Spine Width Calculator</h3>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Book Spine Calculator</h3>
+                        <a href="Layout_Calculators.zip" class="btn btn-outline-light btn-sm" download>
+                            <i class="bi bi-download me-1"></i>Download Layout Calculators
+                        </a>
                     </div>
                     <div class="card-body">
                         <form id="spineCalculator" class="needs-validation" novalidate>
@@ -77,22 +81,16 @@
                                 <div class="col-md-6 d-none" id="boardThicknessSection">
                                     <label for="boardThickness" class="form-label">Board Thickness (mm)</label>
                                     <select class="form-select" id="boardThickness">
-                                        <option value="3.0">1.5 mm</option>
-                                        <option value="3.8">1.9 mm</option>
-                                        <option value="4.0">2.0 mm</option>
-                                        <option value="4.5">2.25 mm</option>
-                                        <option value="5.0">2.5 mm</option>
-                                        <option value="5.5">2.75 mm</option>
+                                        <option value="1.5">1.5 mm</option>
+                                        <option value="1.9">1.9 mm</option>
+                                        <option value="2.5">2.5 mm</option>
+                                        <option value="2.75">2.75 mm</option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="d-flex gap-2 mb-3">
-                                <button type="button" class="btn btn-primary hover-btn px-4" onclick="calculateSpine()">
-                                    <span class="d-none d-md-inline">Calculate Spine Width</span>
-                                    <span class="d-inline d-md-none">Calculate</span>
-                                </button>
-                                <button type="button" class="btn btn-secondary hover-btn px-4" onclick="clearCalculator()">
+                            <div class="d-flex mb-3">
+                                <button type="button" class="btn btn-secondary hover-btn px-4 me-4" onclick="clearCalculator()">
                                     <span class="d-none d-md-inline">Clear Fields</span>
                                     <span class="d-inline d-md-none">Clear</span>
                                 </button>
@@ -163,9 +161,21 @@
         };
 
         // Constants
-        const SPINE_CALCULATION_FACTOR = 20000;
+        const SPINE_CALCULATION_FACTOR = 20000; // Original factor restored
         const CASED_ADDITION = 0.50; // Additional thickness for cased binding
         const SEWN_ADDITION = 1.00; // Additional thickness for sewn binding
+
+        // Initialize event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to all form inputs for dynamic calculation
+            document.getElementById('pageExtent').addEventListener('input', calculateSpineAuto);
+            document.getElementById('paperType').addEventListener('change', calculateSpineAuto);
+            document.getElementById('bindingStyle').addEventListener('change', function() {
+                toggleBoardThickness();
+                calculateSpineAuto();
+            });
+            document.getElementById('boardThickness').addEventListener('change', calculateSpineAuto);
+        });
 
         // Toggle board thickness section visibility
         function toggleBoardThickness() {
@@ -181,14 +191,40 @@
             }
         }
 
+        // Auto-calculate spine width when form values change
+        function calculateSpineAuto() {
+            // Get input values
+            const pageExtent = parseInt(document.getElementById('pageExtent').value);
+            const paperType = document.getElementById('paperType').value;
+            const bindingStyle = document.getElementById('bindingStyle').value;
+            const boardThickness = document.getElementById('boardThickness').value;
+
+            // Validate inputs - if any required field is missing, don't update
+            if (!pageExtent || !paperType || !bindingStyle) {
+                // Hide result box if we don't have all needed values
+                document.getElementById('resultBox').classList.add('d-none');
+                document.getElementById('copyResultBtn').disabled = true;
+                return;
+            }
+
+            if ((bindingStyle === 'Cased' || bindingStyle === 'Cased Sewn') && !boardThickness) {
+                return;
+            }
+
+            // Proceed with calculation
+            calculateSpine();
+        }
+
         // Calculate spine width
         function calculateSpineWidth(pageExtent, paperSpecs, bindingStyle, boardThickness) {
             const baseSpineThickness = (pageExtent * paperSpecs.grammage * paperSpecs.volume) / SPINE_CALCULATION_FACTOR;
 
             if (bindingStyle === 'Cased') {
-                return baseSpineThickness + parseFloat(boardThickness) + CASED_ADDITION;
+                // Account for TWO boards (front and back) plus the cased addition
+                return baseSpineThickness + (2 * parseFloat(boardThickness)) + CASED_ADDITION;
             } else if (bindingStyle === 'Cased Sewn') {
-                return baseSpineThickness + parseFloat(boardThickness) + CASED_ADDITION + SEWN_ADDITION;
+                // Account for TWO boards plus cased and sewn additions
+                return baseSpineThickness + (2 * parseFloat(boardThickness)) + CASED_ADDITION + SEWN_ADDITION;
             }
             return baseSpineThickness;
         }
@@ -211,6 +247,7 @@
             // Get result values
             const paperWeight = document.getElementById('paperWeight').textContent;
             const paperVolume = document.getElementById('paperVolume').textContent;
+            const baseThickness = document.getElementById('baseThickness').textContent;
             const spineResult = document.getElementById('spineResult').textContent;
             
             // Create text for clipboard
@@ -224,6 +261,7 @@ ${boardThicknessText}
 Results:
 Paper Weight: ${paperWeight}
 Paper Volume: ${paperVolume}
+Base Thickness: ${baseThickness} mm
 Final Spine Width: ${spineResult} mm`;
             
             // Copy to clipboard
@@ -260,17 +298,6 @@ Final Spine Width: ${spineResult} mm`;
             const paperType = document.getElementById('paperType').value;
             const bindingStyle = document.getElementById('bindingStyle').value;
             const boardThickness = document.getElementById('boardThickness').value;
-
-            // Validate inputs
-            if (!pageExtent || !paperType || !bindingStyle) {
-                alert('Please fill in all required fields');
-                return;
-            }
-
-            if ((bindingStyle === 'Cased' || bindingStyle === 'Cased Sewn') && !boardThickness) {
-                alert('Please select a board thickness for cased binding');
-                return;
-            }
 
             // Get paper specifications
             const paperSpecs = PAPER_SPECS[paperType];

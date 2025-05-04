@@ -7,7 +7,15 @@ A web-based calculator for determining book spine width based on page count, pap
 The spine calculator uses three main factors to determine spine width:
 1. Number of pages
 2. Paper specifications (grammage and volume)
-3. Binding style and board thickness (for cased binding)
+3. Binding style and board thickness (for cased binding styles)
+
+## Features
+
+- Dynamic calculation that updates as values change
+- Support for multiple binding styles (Limp, Cased, Cased Sewn)
+- Mobile-responsive design
+- Copy results to clipboard for sharing
+- Warning for spine widths exceeding bindery equipment specifications
 
 ## Modifying Paper Specifications
 
@@ -49,7 +57,7 @@ To remove a paper type:
 
 ## Modifying Board Thicknesses
 
-Board thicknesses for cased binding are defined in the HTML select element with ID 'boardThickness'.
+Board thicknesses for cased binding styles are defined in the HTML select element with ID 'boardThickness'.
 
 ### Adding a New Board Thickness
 
@@ -68,7 +76,7 @@ Simply remove the corresponding option from the boardThickness select element.
 
 ## Calculation Formula
 
-The spine width is calculated using the following formula:
+The spine width is calculated using the following formulas:
 
 For Limp binding:
 ```
@@ -77,25 +85,49 @@ spine_width = (pages * grammage * volume) / 20000
 
 For Cased binding:
 ```
-spine_width = (pages * grammage * volume) / 20000 + board_thickness + 0.50
+spine_width = (pages * grammage * volume) / 20000 + (2 * board_thickness) + 0.50
+```
+
+For Cased Sewn binding:
+```
+spine_width = (pages * grammage * volume) / 20000 + (2 * board_thickness) + 0.50 + 1.00
+```
+
+Note that for cased bindings, the board thickness is multiplied by 2 to account for both front and back boards.
+
+## UI Customization
+
+The calculator uses a responsive design that adapts to different screen sizes:
+- On desktop/tablet: Full button text is displayed
+- On mobile: Compact button text is shown
+
+To modify button text for different screen sizes, edit the span elements with Bootstrap's display classes:
+```html
+<span class="d-none d-md-inline">Full Text</span>
+<span class="d-inline d-md-none">Short</span>
 ```
 
 ## Validation
 
 The calculator includes validation for:
 - Required fields (pages, paper type, binding style)
-- Board thickness selection for cased binding
+- Board thickness selection for cased binding styles
 - Maximum spine width warning (60mm limit)
 
 ## Dependencies
 
 The calculator uses:
 - Bootstrap 5.3.2 for styling
-- Bootstrap Icons for icons
+- Bootstrap Icons 1.11.1 for icons
+
+## Additional Resources
+
+The "Download Layout Calculators" button in the header provides access to additional layout calculation tools.
 
 ## Troubleshooting
 
 If calculations seem incorrect, verify:
 1. Paper specifications in the `PAPER_SPECS` object
 2. Board thickness values in the select element
-3. The spine calculation formula constants (20000 divisor, 0.50 addition for cased)
+3. The spine calculation formula constants (20000 divisor, 0.50 addition for cased, 1.00 additional for sewn)
+4. Ensure the board thickness is being multiplied by 2 for cased binding styles
