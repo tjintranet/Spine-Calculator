@@ -42,7 +42,7 @@
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">Book Spine Calculator</h3>
-                        <a href="Layout_Calculators.zip" class="btn btn-outline-light btn-sm" download>
+                        <a href="Layout_Calculators.zip" class="btn btn-outline-light btn-sm" download data-bs-toggle="tooltip" data-bs-placement="bottom" title="Download layout dimension calculators to send to designers for Covers, PPC's & Jackets">
                             <i class="bi bi-download me-1"></i>Download Layout Calculators
                         </a>
                     </div>
@@ -65,6 +65,9 @@
                                         <option value="holmen_60">Holmen Book Cream 60 gsm</option>
                                         <option value="mechanical_70">Enso 70 gsm</option>
                                     </select>
+                                    <div class="mt-2 small" id="paperVolumeDisplay" style="display: none;">
+                                        Paper Volume: <span id="selectedPaperVolume">-</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -108,7 +111,7 @@
                                         <p class="mb-2">Paper Volume: <span id="paperVolume">-</span></p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p class="mb-2">Base Thickness: <span id="baseThickness">-</span> mm</p>
+                                        <p class="mb-2">Spine Bulk: <span id="baseThickness">-</span> mm</p>
                                         <p class="mb-0"><strong>Final Spine Width: <span id="spineResult">-</span> mm</strong></p>
                                     </div>
                                 </div>
@@ -120,6 +123,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
         // Paper specifications
         const PAPER_SPECS = {
@@ -165,18 +169,6 @@
         const CASED_ADDITION = 0.50; // Additional thickness for cased binding
         const SEWN_ADDITION = 1.00; // Additional thickness for sewn binding
 
-        // Initialize event listeners when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add event listeners to all form inputs for dynamic calculation
-            document.getElementById('pageExtent').addEventListener('input', calculateSpineAuto);
-            document.getElementById('paperType').addEventListener('change', calculateSpineAuto);
-            document.getElementById('bindingStyle').addEventListener('change', function() {
-                toggleBoardThickness();
-                calculateSpineAuto();
-            });
-            document.getElementById('boardThickness').addEventListener('change', calculateSpineAuto);
-        });
-
         // Toggle board thickness section visibility
         function toggleBoardThickness() {
             const bindingStyle = document.getElementById('bindingStyle').value;
@@ -198,6 +190,15 @@
             const paperType = document.getElementById('paperType').value;
             const bindingStyle = document.getElementById('bindingStyle').value;
             const boardThickness = document.getElementById('boardThickness').value;
+
+            // Update paper volume display when paper type changes
+            if (paperType) {
+                const paperVolume = PAPER_SPECS[paperType].volume;
+                document.getElementById('selectedPaperVolume').textContent = paperVolume;
+                document.getElementById('paperVolumeDisplay').style.display = 'block';
+            } else {
+                document.getElementById('paperVolumeDisplay').style.display = 'none';
+            }
 
             // Validate inputs - if any required field is missing, don't update
             if (!pageExtent || !paperType || !bindingStyle) {
@@ -261,7 +262,7 @@ ${boardThicknessText}
 Results:
 Paper Weight: ${paperWeight}
 Paper Volume: ${paperVolume}
-Base Thickness: ${baseThickness} mm
+Spine Bulk: ${baseThickness} mm
 Final Spine Width: ${spineResult} mm`;
             
             // Copy to clipboard
@@ -322,18 +323,18 @@ Final Spine Width: ${spineResult} mm`;
                 existingAlert.remove();
             }
 
-            // Check if spine width exceeds 60mm
-            if (spineWidth > 60) {
-                document.getElementById('spineResult').classList.add('text-danger');
+            // Check if base thickness exceeds 60mm
+            if (baseThickness > 60) {
+                document.getElementById('baseThickness').classList.add('text-danger');
                 // Add warning after the results section
                 document.getElementById('resultBox').insertAdjacentHTML('beforeend', 
                     '<div class="alert alert-danger mt-3 mb-0" role="alert">' +
                     '<i class="bi bi-exclamation-triangle-fill me-2"></i>' +
-                    'Warning: Spine width exceeds 60mm maximum specification for bindery equipment' +
+                    'Warning: Spine bulk exceeds 60mm maximum specification for bindery equipment' +
                     '</div>'
                 );
             } else {
-                document.getElementById('spineResult').classList.remove('text-danger');
+                document.getElementById('baseThickness').classList.remove('text-danger');
             }
         }
 
@@ -353,6 +354,9 @@ Final Spine Width: ${spineResult} mm`;
             // Hide results
             document.getElementById('resultBox').classList.add('d-none');
             
+            // Hide paper volume display
+            document.getElementById('paperVolumeDisplay').style.display = 'none';
+            
             // Disable copy to clipboard button
             document.getElementById('copyResultBtn').disabled = true;
             
@@ -369,8 +373,24 @@ Final Spine Width: ${spineResult} mm`;
                 if (this.value < 0) this.value = 0;
             });
         });
-    </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+        // Initialize tooltips and event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Bootstrap tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Add event listeners to all form inputs for dynamic calculation
+            document.getElementById('pageExtent').addEventListener('input', calculateSpineAuto);
+            document.getElementById('paperType').addEventListener('change', calculateSpineAuto);
+            document.getElementById('bindingStyle').addEventListener('change', function() {
+                toggleBoardThickness();
+                calculateSpineAuto();
+            });
+            document.getElementById('boardThickness').addEventListener('change', calculateSpineAuto);
+        });
+    </script>
 </body>
 </html>
