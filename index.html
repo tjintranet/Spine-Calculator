@@ -42,7 +42,7 @@
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">Book Spine Calculator</h3>
-                        <a href="Layout_Calculators.zip" class="btn btn-outline-light btn-sm" download data-bs-toggle="tooltip" data-bs-placement="bottom" title="Download layout dimension calculators to send to designers for Covers, PPC's & Jackets">
+                        <a href="Layout_Calculators.zip" class="btn btn-outline-light btn-sm" download data-bs-toggle="tooltip" data-bs-placement="bottom" title="Download layout dimension calculators to send to designers for Covers, Covers with flaps, PPC's & Jackets">
                             <i class="bi bi-download me-1"></i>Download Layout Calculators
                         </a>
                     </div>
@@ -168,6 +168,7 @@
         const SPINE_CALCULATION_FACTOR = 20000; // Original factor restored
         const CASED_ADDITION = 0.50; // Additional thickness for cased binding
         const SEWN_ADDITION = 1.00; // Additional thickness for sewn binding
+        const LIMP_ADDITION = 0.65; // Additional thickness for limp binding
 
         // Toggle board thickness section visibility
         function toggleBoardThickness() {
@@ -226,6 +227,9 @@
             } else if (bindingStyle === 'Cased Sewn') {
                 // Account for TWO boards plus cased and sewn additions
                 return baseSpineThickness + (2 * parseFloat(boardThickness)) + CASED_ADDITION + SEWN_ADDITION;
+            } else if (bindingStyle === 'Limp') {
+                // Add 0.65mm for Limp binding
+                return baseSpineThickness + LIMP_ADDITION;
             }
             return baseSpineThickness;
         }
