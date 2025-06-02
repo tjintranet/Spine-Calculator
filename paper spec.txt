@@ -35,5 +35,15 @@
                 name: 'Enso 70 gsm',
                 grammage: 70,
                 volume: 20
+            },
+            holmen_bulky_52: {
+                name: 'Holmen Bulky 52 gsm',
+                grammage: 52,
+                volume: 22
+            },
+            holmen_book_55: {
+                name: 'Holmen Book 55 gsm',
+                grammage: 55,
+                volume: 19.6
             }
         };

@@ -19,6 +19,7 @@
             margin: 0;
         }
         input[type="number"] {
+            appearance: textfield;
             -moz-appearance: textfield;
         }
         
@@ -64,6 +65,8 @@
                                         <option value="matt_115">Matt 115 gsm</option>
                                         <option value="holmen_60">Holmen Book Cream 60 gsm</option>
                                         <option value="mechanical_70">Enso 70 gsm</option>
+                                        <option value="holmen_bulky_52">Holmen Bulky 52 gsm</option>
+                                        <option value="holmen_book_55">Holmen Book 55 gsm</option>
                                     </select>
                                     <div class="mt-2 small" id="paperVolumeDisplay" style="display: none;">
                                         Paper Volume: <span id="selectedPaperVolume">-</span>
@@ -161,6 +164,16 @@
                 name: 'Enso 70 gsm',
                 grammage: 70,
                 volume: 20
+            },
+            holmen_bulky_52: {
+                name: 'Holmen Bulky 52 gsm',
+                grammage: 52,
+                volume: 22
+            },
+            holmen_book_55: {
+                name: 'Holmen Book 55 gsm',
+                grammage: 55,
+                volume: 19.6
             }
         };
 
